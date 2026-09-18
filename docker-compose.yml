@@ -1,0 +1,44 @@
+services:
+  mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  seed:
+    build: ./backend
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      MONGO_URI: mongodb://mongo:27017/consultorio
+      SEED_ADMIN_PASSWORD: admin123
+      SEED_USER_PASSWORD: user123
+    command: sh -c "npm run data:import && npm run data:import:demo"
+
+  backend:
+    build: ./backend
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    ports:
+      - "5000:5000"
+    environment:
+      MONGO_URI: mongodb://mongo:27017/consultorio
+      JWT_SECRET: chave-secreta-apenas-para-avaliacao-local
+      PORT: 5000
+      FRONTEND_URL: http://localhost:5173
+      NODE_ENV: development
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:5000
