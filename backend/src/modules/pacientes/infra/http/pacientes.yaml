@@ -1,0 +1,51 @@
+openapi: 3.0.0
+info:
+  title: API de Gestão Clínica - Módulo de Pacientes
+  version: 1.0.0
+  description: API refatorada utilizando princípios de Domain-Driven Design (DDD).
+paths:
+  /api/pacientes:
+    post:
+      summary: Cadastra um novo paciente no sistema
+      tags:
+        - Pacientes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nome
+                - cpf
+              properties:
+                nome:
+                  type: string
+                  example: "Maria da Silva"
+                cpf:
+                  type: string
+                  description: "Apenas números ou formato pontuado"
+                  example: "529.982.247-25"
+                convenio:
+                  type: string
+                  example: "Convenio A"
+                dataRnm:
+                  type: string
+                  format: date-time
+                  example: "2024-05-01T10:00:00.000Z"
+      responses:
+        '201':
+          description: Paciente criado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  id: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+                  nome: "Maria da Silva"
+                  cpf: "52998224725"
+                  convenio: "Conveio A"
+                  dataRnm: "2024-05-01T10:00:00.000Z"
+                  isRnmVencida: false
+        '400':
+          description: Falha na validação de Domínio ou Aplicação (Ex. CPF Inválido, CPF já cadastrado)
